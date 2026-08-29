@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id
+  email           String?
+  name            String?
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  settings        Settings?
+  projects        Project[]
+  tags            Tag[]
+  dailyLogs       DailyLog[]
+  tasks           Task[]
+  weekReflections WeekReflection[]
+  monthReviews    MonthReview[]
+  exportHistory   ExportHistory[]
+}
+
+model Settings {
+  userId           String @id
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyTargetTasks Int    @default(12)
+  dailyTargetHours Int    @default(8)
+  dailySlots       Int    @default(15)
+  weekStartDay     Int    @default(1)
+  theme            String @default("system")
+  defaultPriority  String @default("M")
+  exportFormat     String @default("json")
+  timeFormat       String @default("24h")
+  dateFormat       String @default("YYYY-MM-DD")
+  monthTarget      Int    @default(160)
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  color       String
+  description String?
+  createdAt   DateTime @default(now())
+  tasks       Task[]
+
+  @@index([userId])
+}
+
+model Tag {
+  id     String    @id @default(cuid())
+  userId String
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+  color  String
+  tasks  TaskTag[]
+
+  @@unique([userId, name])
+}
+
+model DailyLog {
+  id           String @id @default(cuid())
+  userId       String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         String
+  weekday      String
+  wins         String @default("")
+  blockers     String @default("")
+  carryForward String @default("")
+  notes        String @default("")
+  energyLevel  Int?
+  tasks        Task[]
+
+  @@unique([userId, date])
+  @@index([userId])
+}
+
+model Task {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date       String
+  slotNumber Int
+  title      String
+  priority   String    @default("")
+  done       Boolean   @default(false)
+  hours      Float     @default(0)
+  notes      String    @default("")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  projectId  String?
+  project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  dailyLog   DailyLog  @relation(fields: [userId, date], references: [userId, date], onDelete: Cascade)
+  tags       TaskTag[]
+
+  @@unique([userId, date, slotNumber])
+  @@index([userId, date])
+  @@index([projectId])
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+}
+
+model WeekReflection {
+  id            String @id @default(cuid())
+  userId        String
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year          Int
+  weekNumber    Int
+  keptOnTrack   String @default("")
+  slowSkipped   String @default("")
+  focusNextWeek String @default("[]")
+
+  @@unique([userId, year, weekNumber])
+}
+
+model MonthReview {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year        Int
+  month       Int
+  monthTarget Int    @default(240)
+  keepDoing   String @default("")
+  stopChange  String @default("")
+  carryOver   String @default("[]")
+
+  @@unique([userId, year, month])
+}
+
+model ExportHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename   String
+  format     String
+  rangeStart String
+  rangeEnd   String
+  exportedAt DateTime @default(now())
+  size       Int
+
+  @@index([userId])
+}
