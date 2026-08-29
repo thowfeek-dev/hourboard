@@ -7,7 +7,7 @@ import { AppFrame } from "@/components/layout/app-frame";
 import { ColorOrbs } from "@/components/art/scene";
 import { todayISO } from "@/lib/dates";
 import { APP_NAME, appOrigin } from "@/lib/constants";
-import { getSettings } from "@/server/actions";
+import { isClerkConfigured } from "@/lib/clerk";
 import "./globals.css";
 
 const sans = Inter({
@@ -40,27 +40,44 @@ export const viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { userId } = await auth();
-  const settings = userId ? await getSettings() : null;
+  let userId: string | null = null;
+  if (isClerkConfigured()) {
+    try {
+      userId = (await auth()).userId;
+    } catch {
+      userId = null;
+    }
+  }
+
+  const body = (
+    <>
+      <ColorOrbs />
+      <Providers>
+        <AppFrame signedIn={Boolean(userId)} currentDate={todayISO()} timeFormat="24h">
+          {children}
+        </AppFrame>
+      </Providers>
+    </>
+  );
+
   return (
     <html lang="en" suppressHydrationWarning className={`${sans.variable} ${mono.variable} h-full`}>
       <head>
         <style>{`.dark input,.dark textarea,.dark select{background:#182234!important;color:#e8eef8!important;-webkit-text-fill-color:#e8eef8!important}.dark input::placeholder,.dark textarea::placeholder{color:#8ea0b8!important}`}</style>
       </head>
       <body className="relative min-h-full antialiased">
-        <ClerkProvider
-          appearance={{
-            cssLayerName: "clerk",
-            variables: { colorPrimary: "#4f46e5" },
-          }}
-        >
-          <ColorOrbs />
-          <Providers>
-            <AppFrame signedIn={Boolean(userId)} currentDate={todayISO()} timeFormat={settings?.timeFormat ?? "24h"}>
-              {children}
-            </AppFrame>
-          </Providers>
-        </ClerkProvider>
+        {isClerkConfigured() ? (
+          <ClerkProvider
+            appearance={{
+              cssLayerName: "clerk",
+              variables: { colorPrimary: "#4f46e5" },
+            }}
+          >
+            {body}
+          </ClerkProvider>
+        ) : (
+          body
+        )}
       </body>
     </html>
   );

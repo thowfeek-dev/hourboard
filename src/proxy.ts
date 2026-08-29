@@ -1,4 +1,6 @@
+import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { isClerkConfigured } from "@/lib/clerk";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -8,11 +10,17 @@ const isPublicRoute = createRouteMatcher([
   "/robots.txt",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+const clerkProxy = clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
 });
+
+export default isClerkConfigured()
+  ? clerkProxy
+  : function proxy() {
+      return NextResponse.next();
+    };
 
 export const config = {
   matcher: [
