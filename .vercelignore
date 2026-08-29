@@ -1,0 +1,7 @@
+.next
+node_modules
+prisma/dev.db
+.env
+.env.local
+.clerk
+scripts/vercel-temp-deploy.mjs

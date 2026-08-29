@@ -22,6 +22,22 @@ Copy `.env.example` to `.env` and `.env.local`. Set `DATABASE_URL` to Postgres a
 
 Signed-out visitors see the marketing landing page. After sign-in, `/` is the dashboard.
 
+## Deploy
+
+Public repo: [github.com/thowfeek-dev/hourboard](https://github.com/thowfeek-dev/hourboard)
+
+Import it on Vercel as **hourboard**:
+
+[https://vercel.com/new/clone?repository-url=https://github.com/thowfeek-dev/hourboard&project-name=hourboard](https://vercel.com/new/clone?repository-url=https://github.com/thowfeek-dev/hourboard&project-name=hourboard)
+
+Then add:
+
+- `DATABASE_URL` — a Postgres database (Vercel Postgres or Neon)
+- Clerk keys from `.env.local`
+- `NEXT_PUBLIC_APP_URL` — your `https://hourboard.vercel.app` URL
+
+Run `npx prisma db push` against that `DATABASE_URL`, and add the Vercel domain in the Clerk dashboard under allowed origins.
+
 ## Scripts
 
 - `npm run dev` — development server
