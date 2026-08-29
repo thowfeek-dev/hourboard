@@ -32,11 +32,11 @@ Import it on Vercel as **hourboard**:
 
 Then add:
 
-- `DATABASE_URL` — a Postgres database (Vercel Postgres or Neon)
-- Clerk keys from `.env.local`
-- `NEXT_PUBLIC_APP_URL` — your `https://hourboard.vercel.app` URL
+- `DATABASE_URL` — Neon **pooled** URL (`…-pooler.…neon.tech`). Do not include `channel_binding=require` (Prisma rejects it). Optional: `DIRECT_URL` with the non-pooler hostname.
+- Clerk keys. For `*.vercel.app`, add `https://hourboard.vercel.app` in Clerk → allowed origins / redirect URLs. Prefer a **production** Clerk instance (`pk_live_`) on the live domain.
+- `NEXT_PUBLIC_APP_URL` — `https://hourboard.vercel.app`
 
-Run `npx prisma db push` against that `DATABASE_URL`, and add the Vercel domain in the Clerk dashboard under allowed origins.
+Vercel builds run `prisma db push` so tables are created automatically. After changing env vars, redeploy.
 
 ## Scripts
 
