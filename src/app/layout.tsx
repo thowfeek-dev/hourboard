@@ -6,7 +6,7 @@ import { Providers } from "@/components/providers";
 import { AppFrame } from "@/components/layout/app-frame";
 import { ColorOrbs } from "@/components/art/scene";
 import { todayISO } from "@/lib/dates";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME, appOrigin } from "@/lib/constants";
 import { getSettings } from "@/server/actions";
 import "./globals.css";
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s · ${APP_NAME}`,
   },
   description: "Private 8-hour work log. Every user gets their own board, charts, and exports.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(appOrigin()),
 };
 
 export const dynamic = "force-dynamic";

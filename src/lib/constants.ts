@@ -1,6 +1,14 @@
 export const APP_NAME = "Hourboard";
 export const APP_VERSION = "1.0.0";
 
+export function appOrigin() {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configured) return configured.replace(/\/$/, "");
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) return `https://${vercel}`;
+  return "http://localhost:3000";
+}
+
 export const PRIORITIES = ["H", "M", "L", ""] as const;
 export type Priority = (typeof PRIORITIES)[number];
 
